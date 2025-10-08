@@ -26,8 +26,8 @@ export const DashboardStats = ({
       label: "Horas Planificadas",
       value: `${totalPlannedHours}h`,
       icon: Clock,
-      color: "accent",
-      bgGradient: "bg-gradient-to-br from-accent/20 to-accent/5",
+      color: "blue",
+      bgGradient: "bg-gradient-to-br from-blue-500/20 to-blue-500/5",
     },
     {
       label: "Horas Ejecutadas",
@@ -40,8 +40,8 @@ export const DashboardStats = ({
       label: "Ingresos Generados",
       value: `$${totalRevenue.toLocaleString()}`,
       icon: DollarSign,
-      color: "warning",
-      bgGradient: "bg-gradient-to-br from-warning/20 to-warning/5",
+      color: "blue",
+      bgGradient: "bg-gradient-to-br from-blue-500/20 to-blue-500/5",
     },
   ];
 

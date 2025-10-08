@@ -139,48 +139,103 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
   return (
     <Card className="bg-gradient-card shadow-md hover:shadow-lg transition-all duration-300 border-border overflow-hidden">
       <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-xl font-semibold text-foreground">{project.name}</h3>
-              <Badge variant={status.variant} className="gap-1">
+        <div className="flex items-center gap-6">
+          {/* Left Section: Project Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-lg font-semibold text-foreground truncate">{project.name}</h3>
+              <Badge variant={status.variant} className="gap-1 shrink-0">
                 <StatusIcon className="w-3 h-3" />
                 {status.label}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{project.description}</p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
+            <p className="text-sm text-muted-foreground line-clamp-1 mb-3">{project.description}</p>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
               {project.clientName && (
-                <div className="flex gap-1"><span className="text-muted-foreground">Cliente:</span> <span className="font-medium">{project.clientName}</span></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Cliente:</span> 
+                  <span className="font-medium">{project.clientName}</span>
+                </div>
               )}
               {project.country && (
-                <div className="flex gap-1"><span className="text-muted-foreground">País:</span> <span className="font-medium">{project.country}</span></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">País:</span> 
+                  <span className="font-medium">{project.country}</span>
+                </div>
               )}
               {project.consultant && (
-                <div className="flex gap-1"><span className="text-muted-foreground">Consultor:</span> <span className="font-medium">{project.consultant}</span></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Consultor:</span> 
+                  <span className="font-medium">{project.consultant}</span>
+                </div>
               )}
               {project.pm && (
-                <div className="flex gap-1"><span className="text-muted-foreground">PM:</span> <span className="font-medium">{project.pm}</span></div>
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">PM:</span> 
+                  <span className="font-medium">{project.pm}</span>
+                </div>
               )}
-            </div>
-            <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Calendar className="w-3 h-3" />
-                <span>{new Date(project.startDate).toLocaleDateString()}</span>
+                <span>{new Date(project.startDate).toLocaleDateString()} - {new Date(project.endDate).toLocaleDateString()}</span>
               </div>
-              <span className="text-muted-foreground">•</span>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Calendar className="w-3 h-3" />
-                <span>{new Date(project.endDate).toLocaleDateString()}</span>
-              </div>
-              <span className="text-muted-foreground">•</span>
               <div className="flex items-center gap-1 text-primary font-medium">
                 <DollarSign className="w-3 h-3" />
                 <span>${project.hourlyRate}/h</span>
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+
+          {/* Center Section: Progress and Stats */}
+          <div className="flex items-center gap-6 px-6 border-l border-border">
+            <div className="flex flex-col items-center justify-center min-w-[120px]">
+              <Progress value={Math.min(progress, 100)} className="h-2 w-24 mb-2" />
+              <span className={`text-sm font-semibold ${isOverBudget ? 'text-warning' : 'text-success'}`}>
+                {project.executedHours} / {project.plannedHours} hrs
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Clock className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Planificado</p>
+                <p className="text-sm font-semibold text-foreground">{project.plannedHours}h</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-success/10">
+                <TrendingUp className="w-4 h-4 text-success" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Ejecutado</p>
+                <p className="text-sm font-semibold text-foreground">{project.executedHours}h</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-accent/10">
+                <DollarSign className="w-4 h-4 text-accent" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Costo</p>
+                <p className="text-sm font-semibold text-foreground">${totalCost.toLocaleString()}</p>
+              </div>
+            </div>
+
+            {isOverBudget && (
+              <div className="px-3 py-1 rounded-lg bg-warning/10 border border-warning/20">
+                <p className="text-xs text-warning font-medium whitespace-nowrap">
+                  ⚠️ +${(totalCost - estimatedCost).toLocaleString()}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Section: Actions */}
+          <div className="flex gap-2 shrink-0">
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" variant="outline" className="shadow-sm">
@@ -337,58 +392,6 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
             </DialogContent>
           </Dialog>
           </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Progreso</span>
-              <span className={`font-semibold ${isOverBudget ? 'text-warning' : 'text-success'}`}>
-                {project.executedHours} / {project.plannedHours} hrs
-              </span>
-            </div>
-            <Progress value={Math.min(progress, 100)} className="h-2" />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 pt-2">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Clock className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Planificado</p>
-                <p className="text-sm font-semibold text-foreground">{project.plannedHours}h</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-success/10">
-                <TrendingUp className="w-4 h-4 text-success" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Ejecutado</p>
-                <p className="text-sm font-semibold text-foreground">{project.executedHours}h</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-accent/10">
-                <DollarSign className="w-4 h-4 text-accent" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Costo</p>
-                <p className="text-sm font-semibold text-foreground">${totalCost.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-
-          {isOverBudget && (
-            <div className="mt-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
-              <p className="text-xs text-warning font-medium">
-                ⚠️ Proyecto sobre presupuesto: ${(totalCost - estimatedCost).toLocaleString()} adicionales
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </Card>
