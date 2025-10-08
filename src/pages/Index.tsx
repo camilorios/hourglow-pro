@@ -74,12 +74,12 @@ const Index = () => {
     consultant: string;
     pm: string;
     country: string;
+    hourlyRate: number;
   }) => {
     const newProject: Project = {
       id: Date.now().toString(),
       ...projectData,
       executedHours: 0,
-      hourlyRate: 50,
     };
     setProjects([...projects, newProject]);
   };

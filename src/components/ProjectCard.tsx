@@ -46,6 +46,7 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
   const [editPlannedHours, setEditPlannedHours] = useState(project.plannedHours.toString());
   const [editStartDate, setEditStartDate] = useState(project.startDate);
   const [editEndDate, setEditEndDate] = useState(project.endDate);
+  const [editHourlyRate, setEditHourlyRate] = useState(project.hourlyRate.toString());
 
   const progress = (project.executedHours / project.plannedHours) * 100;
   const totalCost = project.executedHours * project.hourlyRate;
@@ -102,6 +103,12 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
       return;
     }
 
+    const rate = parseFloat(editHourlyRate);
+    if (isNaN(rate) || rate <= 0) {
+      toast.error("Por favor ingrese un valor por hora válido");
+      return;
+    }
+
     if (!editStartDate || !editEndDate) {
       toast.error("Las fechas de inicio y fin son requeridas");
       return;
@@ -122,6 +129,7 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
       consultant: editConsultant.trim(),
       pm: editPm.trim(),
       country: editCountry.trim(),
+      hourlyRate: rate,
     });
 
     setIsEditOpen(false);
@@ -140,30 +148,35 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
                 {status.label}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mb-3">{project.description}</p>
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground mb-3">
+            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{project.description}</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
               {project.clientName && (
-                <div><span className="font-medium">Cliente:</span> {project.clientName}</div>
+                <div className="flex gap-1"><span className="text-muted-foreground">Cliente:</span> <span className="font-medium">{project.clientName}</span></div>
               )}
               {project.country && (
-                <div><span className="font-medium">País:</span> {project.country}</div>
+                <div className="flex gap-1"><span className="text-muted-foreground">País:</span> <span className="font-medium">{project.country}</span></div>
               )}
               {project.consultant && (
-                <div><span className="font-medium">Consultor:</span> {project.consultant}</div>
+                <div className="flex gap-1"><span className="text-muted-foreground">Consultor:</span> <span className="font-medium">{project.consultant}</span></div>
               )}
               {project.pm && (
-                <div><span className="font-medium">PM:</span> {project.pm}</div>
+                <div className="flex gap-1"><span className="text-muted-foreground">PM:</span> <span className="font-medium">{project.pm}</span></div>
               )}
             </div>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-1 text-muted-foreground">
                 <Calendar className="w-3 h-3" />
                 <span>{new Date(project.startDate).toLocaleDateString()}</span>
               </div>
-              <span>•</span>
-              <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">•</span>
+              <div className="flex items-center gap-1 text-muted-foreground">
                 <Calendar className="w-3 h-3" />
                 <span>{new Date(project.endDate).toLocaleDateString()}</span>
+              </div>
+              <span className="text-muted-foreground">•</span>
+              <div className="flex items-center gap-1 text-primary font-medium">
+                <DollarSign className="w-3 h-3" />
+                <span>${project.hourlyRate}/h</span>
               </div>
             </div>
           </div>
@@ -238,17 +251,31 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
                       />
                     </div>
                   </div>
-                  <div>
-                    <Label htmlFor="edit-hours">Horas Planificadas</Label>
-                    <Input
-                      id="edit-hours"
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={editPlannedHours}
-                      onChange={(e) => setEditPlannedHours(e.target.value)}
-                      className="mt-2"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-hours">Horas Planificadas</Label>
+                      <Input
+                        id="edit-hours"
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        value={editPlannedHours}
+                        onChange={(e) => setEditPlannedHours(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-rate">Valor por Hora ($)</Label>
+                      <Input
+                        id="edit-rate"
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        value={editHourlyRate}
+                        onChange={(e) => setEditHourlyRate(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

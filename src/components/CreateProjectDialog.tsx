@@ -18,6 +18,7 @@ interface CreateProjectDialogProps {
     consultant: string;
     pm: string;
     country: string;
+    hourlyRate: number;
   }) => void;
 }
 
@@ -32,6 +33,7 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
   const [consultant, setConsultant] = useState("");
   const [pm, setPm] = useState("");
   const [country, setCountry] = useState("");
+  const [hourlyRate, setHourlyRate] = useState("50");
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -42,6 +44,12 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
     const hours = parseFloat(plannedHours);
     if (isNaN(hours) || hours <= 0) {
       toast.error("Por favor ingrese horas planificadas válidas");
+      return;
+    }
+
+    const rate = parseFloat(hourlyRate);
+    if (isNaN(rate) || rate <= 0) {
+      toast.error("Por favor ingrese un valor por hora válido");
       return;
     }
 
@@ -65,6 +73,7 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
       consultant: consultant.trim(),
       pm: pm.trim(),
       country: country.trim(),
+      hourlyRate: rate,
     });
 
     setName("");
@@ -76,6 +85,7 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
     setConsultant("");
     setPm("");
     setCountry("");
+    setHourlyRate("50");
     setIsOpen(false);
     toast.success("Proyecto creado exitosamente");
   };
@@ -161,21 +171,33 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="hours">Horas Planificadas</Label>
-            <Input
-              id="hours"
-              type="number"
-              step="0.5"
-              min="0"
-              placeholder="0.0"
-              value={plannedHours}
-              onChange={(e) => setPlannedHours(e.target.value)}
-              className="mt-2"
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              Tarifa: $50/hora
-            </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="hours">Horas Planificadas</Label>
+              <Input
+                id="hours"
+                type="number"
+                step="0.5"
+                min="0"
+                placeholder="0.0"
+                value={plannedHours}
+                onChange={(e) => setPlannedHours(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hourlyRate">Valor por Hora ($)</Label>
+              <Input
+                id="hourlyRate"
+                type="number"
+                step="0.5"
+                min="0"
+                placeholder="50.0"
+                value={hourlyRate}
+                onChange={(e) => setHourlyRate(e.target.value)}
+                className="mt-2"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
