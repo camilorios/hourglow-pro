@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ProjectCard } from "@/components/ProjectCard";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
 import { DashboardStats } from "@/components/DashboardStats";
+import tigoLogo from "@/assets/tigo-business-logo.png";
 
 interface Project {
   id: string;
@@ -109,6 +110,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <img 
+            src={tigoLogo} 
+            alt="Tigo Business" 
+            className="h-16 md:h-20 object-contain"
+          />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">

@@ -64,8 +64,8 @@ export const DashboardStats = ({
                     {stat.value}
                   </p>
                 </div>
-                <div className={`p-4 rounded-xl ${stat.bgGradient}`}>
-                  <Icon className="w-6 h-6 text-white" />
+                <div className={`p-5 rounded-xl ${stat.bgGradient} shadow-lg`}>
+                  <Icon className="w-8 h-8 text-white drop-shadow-md" strokeWidth={2.5} />
                 </div>
               </div>
             </div>
