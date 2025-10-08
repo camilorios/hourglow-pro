@@ -1,9 +1,20 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, DollarSign, TrendingUp, Plus, Calendar, AlertCircle, Edit } from "lucide-react";
+import { Clock, DollarSign, TrendingUp, Plus, Calendar, AlertCircle, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -29,9 +40,10 @@ interface ProjectCardProps {
   project: Project;
   onUpdateHours: (id: string, hours: number) => void;
   onUpdateProject: (id: string, updates: Partial<Project>) => void;
+  onDeleteProject: (id: string) => void;
 }
 
-export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteProject }: ProjectCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [hoursToAdd, setHoursToAdd] = useState("");
@@ -136,6 +148,11 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
     toast.success("Proyecto actualizado exitosamente");
   };
 
+  const handleDelete = () => {
+    onDeleteProject(project.id);
+    toast.success("Proyecto eliminado");
+  };
+
   return (
     <Card className="bg-gradient-card shadow-md hover:shadow-lg transition-all duration-300 border-border overflow-hidden">
       <div className="p-6">
@@ -236,6 +253,28 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: Project
 
           {/* Right Section: Actions */}
           <div className="flex gap-2 shrink-0">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="destructive" className="shadow-sm">
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Eliminar
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Esto eliminará permanentemente el proyecto.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Eliminar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" variant="outline" className="shadow-sm">

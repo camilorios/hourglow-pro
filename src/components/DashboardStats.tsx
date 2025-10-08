@@ -1,11 +1,12 @@
 import { Card } from "@/components/ui/card";
-import { Clock, DollarSign, FolderOpen, TrendingUp } from "lucide-react";
+import { Clock, DollarSign, FolderOpen, TrendingUp, Users } from "lucide-react";
 
 interface DashboardStatsProps {
   totalProjects: number;
   totalPlannedHours: number;
   totalExecutedHours: number;
   totalRevenue: number;
+  totalVisits: number;
 }
 
 export const DashboardStats = ({
@@ -13,6 +14,7 @@ export const DashboardStats = ({
   totalPlannedHours,
   totalExecutedHours,
   totalRevenue,
+  totalVisits,
 }: DashboardStatsProps) => {
   const stats = [
     {
@@ -43,10 +45,17 @@ export const DashboardStats = ({
       color: "blue",
       bgGradient: "bg-gradient-to-br from-blue-500/20 to-blue-500/5",
     },
+    {
+      label: "Visitas Ejecutadas",
+      value: totalVisits,
+      icon: Users,
+      color: "accent",
+      bgGradient: "bg-gradient-to-br from-purple-500/20 to-purple-500/5",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (

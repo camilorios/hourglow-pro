@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ProjectCard } from "@/components/ProjectCard";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
+import { CreateVisitDialog } from "@/components/CreateVisitDialog";
+import { VisitCard } from "@/components/VisitCard";
 import { DashboardStats } from "@/components/DashboardStats";
 import tigoLogo from "@/assets/tigo-business-logo.png";
 
@@ -17,6 +19,16 @@ interface Project {
   consultant: string;
   pm: string;
   country: string;
+}
+
+interface Visit {
+  id: string;
+  producto: string;
+  pais: string;
+  consultor: string;
+  tiempo: number;
+  fecha: string;
+  valorOportunidad: number;
 }
 
 const Index = () => {
@@ -65,6 +77,27 @@ const Index = () => {
     },
   ]);
 
+  const [visits, setVisits] = useState<Visit[]>([
+    {
+      id: "1",
+      producto: "Solución Cloud",
+      pais: "Chile",
+      consultor: "Ana García",
+      tiempo: 2,
+      fecha: "2025-01-10",
+      valorOportunidad: 50000,
+    },
+    {
+      id: "2",
+      producto: "Ciberseguridad",
+      pais: "México",
+      consultor: "Pedro Martínez",
+      tiempo: 3,
+      fecha: "2025-01-15",
+      valorOportunidad: 75000,
+    },
+  ]);
+
   const handleCreateProject = (projectData: {
     name: string;
     description: string;
@@ -103,9 +136,33 @@ const Index = () => {
     );
   };
 
+  const handleDeleteProject = (id: string) => {
+    setProjects(projects.filter((project) => project.id !== id));
+  };
+
+  const handleCreateVisit = (visitData: {
+    producto: string;
+    pais: string;
+    consultor: string;
+    tiempo: number;
+    fecha: string;
+    valorOportunidad: number;
+  }) => {
+    const newVisit: Visit = {
+      id: Date.now().toString(),
+      ...visitData,
+    };
+    setVisits([...visits, newVisit]);
+  };
+
+  const handleDeleteVisit = (id: string) => {
+    setVisits(visits.filter((visit) => visit.id !== id));
+  };
+
   const totalPlannedHours = projects.reduce((sum, p) => sum + p.plannedHours, 0);
   const totalExecutedHours = projects.reduce((sum, p) => sum + p.executedHours, 0);
   const totalRevenue = projects.reduce((sum, p) => sum + p.executedHours * p.hourlyRate, 0);
+  const totalVisits = visits.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,7 +187,10 @@ const Index = () => {
                 Control y seguimiento de horas por proyecto
               </p>
             </div>
-            <CreateProjectDialog onCreateProject={handleCreateProject} />
+            <div className="flex gap-3">
+              <CreateProjectDialog onCreateProject={handleCreateProject} />
+              <CreateVisitDialog onCreateVisit={handleCreateVisit} />
+            </div>
           </div>
 
           <DashboardStats
@@ -138,6 +198,7 @@ const Index = () => {
             totalPlannedHours={totalPlannedHours}
             totalExecutedHours={totalExecutedHours}
             totalRevenue={totalRevenue}
+            totalVisits={totalVisits}
           />
         </div>
 
@@ -163,6 +224,34 @@ const Index = () => {
                   project={project}
                   onUpdateHours={handleUpdateHours}
                   onUpdateProject={handleUpdateProject}
+                  onDeleteProject={handleDeleteProject}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Commercial Visits Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-semibold text-foreground mb-6">
+            Visitas Comerciales
+          </h2>
+          {visits.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg mb-4">
+                No hay visitas comerciales registradas
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Registra tu primera visita comercial
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {visits.map((visit) => (
+                <VisitCard
+                  key={visit.id}
+                  visit={visit}
+                  onDeleteVisit={handleDeleteVisit}
                 />
               ))}
             </div>
