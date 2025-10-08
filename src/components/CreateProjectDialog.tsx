@@ -14,6 +14,10 @@ interface CreateProjectDialogProps {
     plannedHours: number;
     startDate: string;
     endDate: string;
+    clientName: string;
+    consultant: string;
+    pm: string;
+    country: string;
   }) => void;
 }
 
@@ -24,6 +28,10 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
   const [plannedHours, setPlannedHours] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [clientName, setClientName] = useState("");
+  const [consultant, setConsultant] = useState("");
+  const [pm, setPm] = useState("");
+  const [country, setCountry] = useState("");
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -53,6 +61,10 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
       plannedHours: hours,
       startDate,
       endDate,
+      clientName: clientName.trim(),
+      consultant: consultant.trim(),
+      pm: pm.trim(),
+      country: country.trim(),
     });
 
     setName("");
@@ -60,6 +72,10 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
     setPlannedHours("");
     setStartDate("");
     setEndDate("");
+    setClientName("");
+    setConsultant("");
+    setPm("");
+    setCountry("");
     setIsOpen(false);
     toast.success("Proyecto creado exitosamente");
   };
@@ -97,6 +113,52 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
               onChange={(e) => setDescription(e.target.value)}
               className="mt-2 min-h-[100px]"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="clientName">Nombre del Cliente</Label>
+              <Input
+                id="clientName"
+                placeholder="Ej: Empresa ABC"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="country">País</Label>
+              <Input
+                id="country"
+                placeholder="Ej: Chile"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="consultant">Consultor Asignado</Label>
+              <Input
+                id="consultant"
+                placeholder="Ej: Juan Pérez"
+                value={consultant}
+                onChange={(e) => setConsultant(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pm">PM Asignado</Label>
+              <Input
+                id="pm"
+                placeholder="Ej: María González"
+                value={pm}
+                onChange={(e) => setPm(e.target.value)}
+                className="mt-2"
+              />
+            </div>
           </div>
 
           <div>

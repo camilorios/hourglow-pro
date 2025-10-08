@@ -1,12 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, DollarSign, TrendingUp, Plus, Calendar, AlertCircle } from "lucide-react";
+import { Clock, DollarSign, TrendingUp, Plus, Calendar, AlertCircle, Edit } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface Project {
@@ -18,16 +19,33 @@ interface Project {
   hourlyRate: number;
   startDate: string;
   endDate: string;
+  clientName: string;
+  consultant: string;
+  pm: string;
+  country: string;
 }
 
 interface ProjectCardProps {
   project: Project;
   onUpdateHours: (id: string, hours: number) => void;
+  onUpdateProject: (id: string, updates: Partial<Project>) => void;
 }
 
-export const ProjectCard = ({ project, onUpdateHours }: ProjectCardProps) => {
+export const ProjectCard = ({ project, onUpdateHours, onUpdateProject }: ProjectCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [hoursToAdd, setHoursToAdd] = useState("");
+  
+  // Edit form states
+  const [editName, setEditName] = useState(project.name);
+  const [editDescription, setEditDescription] = useState(project.description);
+  const [editClientName, setEditClientName] = useState(project.clientName);
+  const [editConsultant, setEditConsultant] = useState(project.consultant);
+  const [editPm, setEditPm] = useState(project.pm);
+  const [editCountry, setEditCountry] = useState(project.country);
+  const [editPlannedHours, setEditPlannedHours] = useState(project.plannedHours.toString());
+  const [editStartDate, setEditStartDate] = useState(project.startDate);
+  const [editEndDate, setEditEndDate] = useState(project.endDate);
 
   const progress = (project.executedHours / project.plannedHours) * 100;
   const totalCost = project.executedHours * project.hourlyRate;
@@ -77,6 +95,39 @@ export const ProjectCard = ({ project, onUpdateHours }: ProjectCardProps) => {
     toast.success(`${hours} horas agregadas al proyecto`);
   };
 
+  const handleEditProject = () => {
+    const hours = parseFloat(editPlannedHours);
+    if (isNaN(hours) || hours <= 0) {
+      toast.error("Por favor ingrese horas planificadas válidas");
+      return;
+    }
+
+    if (!editStartDate || !editEndDate) {
+      toast.error("Las fechas de inicio y fin son requeridas");
+      return;
+    }
+
+    if (new Date(editStartDate) > new Date(editEndDate)) {
+      toast.error("La fecha de inicio no puede ser posterior a la fecha de fin");
+      return;
+    }
+
+    onUpdateProject(project.id, {
+      name: editName.trim(),
+      description: editDescription.trim(),
+      plannedHours: hours,
+      startDate: editStartDate,
+      endDate: editEndDate,
+      clientName: editClientName.trim(),
+      consultant: editConsultant.trim(),
+      pm: editPm.trim(),
+      country: editCountry.trim(),
+    });
+
+    setIsEditOpen(false);
+    toast.success("Proyecto actualizado exitosamente");
+  };
+
   return (
     <Card className="bg-gradient-card shadow-md hover:shadow-lg transition-all duration-300 border-border overflow-hidden">
       <div className="p-6">
@@ -90,6 +141,20 @@ export const ProjectCard = ({ project, onUpdateHours }: ProjectCardProps) => {
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground mb-3">{project.description}</p>
+            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground mb-3">
+              {project.clientName && (
+                <div><span className="font-medium">Cliente:</span> {project.clientName}</div>
+              )}
+              {project.country && (
+                <div><span className="font-medium">País:</span> {project.country}</div>
+              )}
+              {project.consultant && (
+                <div><span className="font-medium">Consultor:</span> {project.consultant}</div>
+              )}
+              {project.pm && (
+                <div><span className="font-medium">PM:</span> {project.pm}</div>
+              )}
+            </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
@@ -102,7 +167,118 @@ export const ProjectCard = ({ project, onUpdateHours }: ProjectCardProps) => {
               </div>
             </div>
           </div>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <div className="flex gap-2">
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="shadow-sm">
+                  <Edit className="w-4 h-4 mr-1" />
+                  Editar
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Editar Proyecto</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div>
+                    <Label htmlFor="edit-name">Nombre del Proyecto</Label>
+                    <Input
+                      id="edit-name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-description">Descripción</Label>
+                    <Textarea
+                      id="edit-description"
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      className="mt-2 min-h-[80px]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-client">Cliente</Label>
+                      <Input
+                        id="edit-client"
+                        value={editClientName}
+                        onChange={(e) => setEditClientName(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-country">País</Label>
+                      <Input
+                        id="edit-country"
+                        value={editCountry}
+                        onChange={(e) => setEditCountry(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-consultant">Consultor</Label>
+                      <Input
+                        id="edit-consultant"
+                        value={editConsultant}
+                        onChange={(e) => setEditConsultant(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-pm">PM</Label>
+                      <Input
+                        id="edit-pm"
+                        value={editPm}
+                        onChange={(e) => setEditPm(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-hours">Horas Planificadas</Label>
+                    <Input
+                      id="edit-hours"
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      value={editPlannedHours}
+                      onChange={(e) => setEditPlannedHours(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-start">Fecha de Inicio</Label>
+                      <Input
+                        id="edit-start"
+                        type="date"
+                        value={editStartDate}
+                        onChange={(e) => setEditStartDate(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-end">Fecha de Fin</Label>
+                      <Input
+                        id="edit-end"
+                        type="date"
+                        value={editEndDate}
+                        onChange={(e) => setEditEndDate(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleEditProject} className="w-full bg-gradient-primary">
+                    Guardar Cambios
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="bg-gradient-primary shadow-sm hover:shadow-glow">
                 <Plus className="w-4 h-4 mr-1" />
@@ -133,6 +309,7 @@ export const ProjectCard = ({ project, onUpdateHours }: ProjectCardProps) => {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <div className="space-y-4">

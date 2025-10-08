@@ -12,6 +12,10 @@ interface Project {
   hourlyRate: number;
   startDate: string;
   endDate: string;
+  clientName: string;
+  consultant: string;
+  pm: string;
+  country: string;
 }
 
 const Index = () => {
@@ -25,6 +29,10 @@ const Index = () => {
       hourlyRate: 50,
       startDate: "2025-01-01",
       endDate: "2025-03-15",
+      clientName: "TechCorp S.A.",
+      consultant: "Ana García",
+      pm: "Carlos Ruiz",
+      country: "Chile",
     },
     {
       id: "2",
@@ -35,6 +43,10 @@ const Index = () => {
       hourlyRate: 50,
       startDate: "2024-12-01",
       endDate: "2025-04-30",
+      clientName: "ShopNow Inc.",
+      consultant: "Pedro Martínez",
+      pm: "Laura Sánchez",
+      country: "México",
     },
     {
       id: "3",
@@ -45,6 +57,10 @@ const Index = () => {
       hourlyRate: 50,
       startDate: "2025-01-15",
       endDate: "2025-05-20",
+      clientName: "Retail Plus",
+      consultant: "Jorge López",
+      pm: "María González",
+      country: "Colombia",
     },
   ]);
 
@@ -54,6 +70,10 @@ const Index = () => {
     plannedHours: number;
     startDate: string;
     endDate: string;
+    clientName: string;
+    consultant: string;
+    pm: string;
+    country: string;
   }) => {
     const newProject: Project = {
       id: Date.now().toString(),
@@ -70,6 +90,14 @@ const Index = () => {
         project.id === id
           ? { ...project, executedHours: project.executedHours + hoursToAdd }
           : project
+      )
+    );
+  };
+
+  const handleUpdateProject = (id: string, updates: Partial<Project>) => {
+    setProjects(
+      projects.map((project) =>
+        project.id === id ? { ...project, ...updates } : project
       )
     );
   };
@@ -124,6 +152,7 @@ const Index = () => {
                   key={project.id}
                   project={project}
                   onUpdateHours={handleUpdateHours}
+                  onUpdateProject={handleUpdateProject}
                 />
               ))}
             </div>
