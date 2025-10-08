@@ -12,6 +12,8 @@ interface CreateProjectDialogProps {
     name: string;
     description: string;
     plannedHours: number;
+    startDate: string;
+    endDate: string;
   }) => void;
 }
 
@@ -20,6 +22,8 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [plannedHours, setPlannedHours] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -33,15 +37,29 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
       return;
     }
 
+    if (!startDate || !endDate) {
+      toast.error("Las fechas de inicio y fin son requeridas");
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      toast.error("La fecha de inicio no puede ser posterior a la fecha de fin");
+      return;
+    }
+
     onCreateProject({
       name: name.trim(),
       description: description.trim(),
       plannedHours: hours,
+      startDate,
+      endDate,
     });
 
     setName("");
     setDescription("");
     setPlannedHours("");
+    setStartDate("");
+    setEndDate("");
     setIsOpen(false);
     toast.success("Proyecto creado exitosamente");
   };
@@ -96,6 +114,29 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
             <p className="text-xs text-muted-foreground mt-2">
               Tarifa: $50/hora
             </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="startDate">Fecha de Inicio</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="endDate">Fecha de Fin</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="mt-2"
+              />
+            </div>
           </div>
 
           <Button onClick={handleSubmit} className="w-full bg-gradient-primary">

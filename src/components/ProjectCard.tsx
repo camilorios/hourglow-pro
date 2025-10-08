@@ -1,11 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, DollarSign, TrendingUp, Plus } from "lucide-react";
+import { Clock, DollarSign, TrendingUp, Plus, Calendar, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
 interface Project {
@@ -15,6 +16,8 @@ interface Project {
   plannedHours: number;
   executedHours: number;
   hourlyRate: number;
+  startDate: string;
+  endDate: string;
 }
 
 interface ProjectCardProps {
@@ -30,6 +33,37 @@ export const ProjectCard = ({ project, onUpdateHours }: ProjectCardProps) => {
   const totalCost = project.executedHours * project.hourlyRate;
   const estimatedCost = project.plannedHours * project.hourlyRate;
   const isOverBudget = project.executedHours > project.plannedHours;
+
+  // Calculate time-based status
+  const now = new Date();
+  const start = new Date(project.startDate);
+  const end = new Date(project.endDate);
+  const totalDuration = end.getTime() - start.getTime();
+  const elapsed = now.getTime() - start.getTime();
+  const timeProgress = Math.min(Math.max((elapsed / totalDuration) * 100, 0), 100);
+  
+  const getProjectStatus = () => {
+    if (now < start) {
+      return { label: "Pendiente", variant: "secondary" as const, icon: Clock };
+    }
+    if (now > end) {
+      return progress >= 100 
+        ? { label: "Completado", variant: "default" as const, icon: TrendingUp }
+        : { label: "Retrasado", variant: "destructive" as const, icon: AlertCircle };
+    }
+    
+    // Project is in progress
+    if (progress < timeProgress - 10) {
+      return { label: "Atrasado", variant: "destructive" as const, icon: AlertCircle };
+    } else if (progress > timeProgress + 10) {
+      return { label: "Adelantado", variant: "default" as const, icon: TrendingUp };
+    } else {
+      return { label: "En Progreso", variant: "outline" as const, icon: Clock };
+    }
+  };
+
+  const status = getProjectStatus();
+  const StatusIcon = status.icon;
 
   const handleAddHours = () => {
     const hours = parseFloat(hoursToAdd);
@@ -47,9 +81,26 @@ export const ProjectCard = ({ project, onUpdateHours }: ProjectCardProps) => {
     <Card className="bg-gradient-card shadow-md hover:shadow-lg transition-all duration-300 border-border overflow-hidden">
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">{project.name}</h3>
-            <p className="text-sm text-muted-foreground">{project.description}</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-xl font-semibold text-foreground">{project.name}</h3>
+              <Badge variant={status.variant} className="gap-1">
+                <StatusIcon className="w-3 h-3" />
+                {status.label}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">{project.description}</p>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                <span>{new Date(project.startDate).toLocaleDateString()}</span>
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                <span>{new Date(project.endDate).toLocaleDateString()}</span>
+              </div>
+            </div>
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>

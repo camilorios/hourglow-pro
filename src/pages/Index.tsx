@@ -10,6 +10,8 @@ interface Project {
   plannedHours: number;
   executedHours: number;
   hourlyRate: number;
+  startDate: string;
+  endDate: string;
 }
 
 const Index = () => {
@@ -21,6 +23,8 @@ const Index = () => {
       plannedHours: 120,
       executedHours: 85,
       hourlyRate: 50,
+      startDate: "2025-01-01",
+      endDate: "2025-03-15",
     },
     {
       id: "2",
@@ -29,6 +33,8 @@ const Index = () => {
       plannedHours: 200,
       executedHours: 150,
       hourlyRate: 50,
+      startDate: "2024-12-01",
+      endDate: "2025-04-30",
     },
     {
       id: "3",
@@ -37,6 +43,8 @@ const Index = () => {
       plannedHours: 160,
       executedHours: 95,
       hourlyRate: 50,
+      startDate: "2025-01-15",
+      endDate: "2025-05-20",
     },
   ]);
 
@@ -44,6 +52,8 @@ const Index = () => {
     name: string;
     description: string;
     plannedHours: number;
+    startDate: string;
+    endDate: string;
   }) => {
     const newProject: Project = {
       id: Date.now().toString(),
