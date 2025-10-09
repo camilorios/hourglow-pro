@@ -19,6 +19,9 @@ interface Project {
   consultant: string;
   pm: string;
   country: string;
+  numeroOportunidad: string;
+  observaciones: Array<{ id: string; text: string; date: string }>;
+  terminado: boolean;
 }
 
 interface Visit {
@@ -46,6 +49,9 @@ const Index = () => {
       consultant: "Ana García",
       pm: "Carlos Ruiz",
       country: "Chile",
+      numeroOportunidad: "OPP-2025-001",
+      observaciones: [],
+      terminado: false,
     },
     {
       id: "2",
@@ -60,6 +66,9 @@ const Index = () => {
       consultant: "Pedro Martínez",
       pm: "Laura Sánchez",
       country: "México",
+      numeroOportunidad: "OPP-2024-045",
+      observaciones: [],
+      terminado: false,
     },
     {
       id: "3",
@@ -74,6 +83,9 @@ const Index = () => {
       consultant: "Jorge López",
       pm: "María González",
       country: "Colombia",
+      numeroOportunidad: "OPP-2025-008",
+      observaciones: [],
+      terminado: false,
     },
   ]);
 
@@ -109,11 +121,14 @@ const Index = () => {
     pm: string;
     country: string;
     hourlyRate: number;
+    numeroOportunidad: string;
   }) => {
     const newProject: Project = {
       id: Date.now().toString(),
       ...projectData,
       executedHours: 0,
+      observaciones: [],
+      terminado: false,
     };
     setProjects([...projects, newProject]);
   };

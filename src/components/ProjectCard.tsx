@@ -1,8 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Clock, DollarSign, TrendingUp, Plus, Calendar, AlertCircle, Edit, Trash2 } from "lucide-react";
+import { Clock, DollarSign, TrendingUp, Plus, Calendar, AlertCircle, Edit, Trash2, MessageSquare, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -34,6 +35,9 @@ interface Project {
   consultant: string;
   pm: string;
   country: string;
+  numeroOportunidad: string;
+  observaciones: Array<{ id: string; text: string; date: string }>;
+  terminado: boolean;
 }
 
 interface ProjectCardProps {
@@ -59,6 +63,8 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
   const [editStartDate, setEditStartDate] = useState(project.startDate);
   const [editEndDate, setEditEndDate] = useState(project.endDate);
   const [editHourlyRate, setEditHourlyRate] = useState(project.hourlyRate.toString());
+  const [editTerminado, setEditTerminado] = useState(project.terminado);
+  const [newObservacion, setNewObservacion] = useState("");
 
   const progress = (project.executedHours / project.plannedHours) * 100;
   const totalCost = project.executedHours * project.hourlyRate;
@@ -142,6 +148,7 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
       pm: editPm.trim(),
       country: editCountry.trim(),
       hourlyRate: rate,
+      terminado: editTerminado,
     });
 
     setIsEditOpen(false);
@@ -151,6 +158,26 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
   const handleDelete = () => {
     onDeleteProject(project.id);
     toast.success("Proyecto eliminado");
+  };
+
+  const handleAddObservacion = () => {
+    if (!newObservacion.trim()) {
+      toast.error("La observación no puede estar vacía");
+      return;
+    }
+
+    const nuevaObservacion = {
+      id: Date.now().toString(),
+      text: newObservacion.trim(),
+      date: new Date().toISOString(),
+    };
+
+    onUpdateProject(project.id, {
+      observaciones: [...project.observaciones, nuevaObservacion],
+    });
+
+    setNewObservacion("");
+    toast.success("Observación agregada");
   };
 
   return (
@@ -165,9 +192,21 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
                 <StatusIcon className="w-3 h-3" />
                 {status.label}
               </Badge>
+              {project.terminado && (
+                <Badge variant="default" className="gap-1 shrink-0 bg-success">
+                  <CheckCircle className="w-3 h-3" />
+                  Finalizado
+                </Badge>
+              )}
             </div>
             <p className="text-sm text-muted-foreground line-clamp-1 mb-3">{project.description}</p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
+              {project.numeroOportunidad && (
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Oportunidad:</span> 
+                  <span className="font-medium">{project.numeroOportunidad}</span>
+                </div>
+              )}
               {project.clientName && (
                 <div className="flex items-center gap-1">
                   <span className="text-muted-foreground">Cliente:</span> 
@@ -393,6 +432,54 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
                       />
                     </div>
                   </div>
+
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <Label htmlFor="terminado">Marcar como Finalizado</Label>
+                      <Switch
+                        id="terminado"
+                        checked={editTerminado}
+                        onCheckedChange={setEditTerminado}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4 mt-4">
+                    <Label className="mb-3 block">Observaciones</Label>
+                    
+                    {project.observaciones.length > 0 && (
+                      <div className="space-y-2 mb-4 max-h-[200px] overflow-y-auto">
+                        {project.observaciones.map((obs) => (
+                          <div key={obs.id} className="p-3 bg-muted rounded-lg">
+                            <p className="text-sm text-foreground mb-1">{obs.text}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(obs.date).toLocaleString('es-ES', {
+                                dateStyle: 'short',
+                                timeStyle: 'short'
+                              })}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Textarea
+                        placeholder="Agregar nueva observación..."
+                        value={newObservacion}
+                        onChange={(e) => setNewObservacion(e.target.value)}
+                        className="min-h-[80px]"
+                      />
+                      <Button 
+                        onClick={handleAddObservacion} 
+                        size="sm"
+                        className="shrink-0"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
                   <Button onClick={handleEditProject} className="w-full bg-gradient-primary">
                     Guardar Cambios
                   </Button>
