@@ -35,22 +35,22 @@ export const DashboardStats = ({
       label: "Horas Ejecutadas",
       value: `${totalExecutedHours}h`,
       icon: TrendingUp,
-      color: "success",
-      bgGradient: "bg-gradient-success",
+      color: "primary",
+      bgGradient: "bg-gradient-primary",
     },
     {
       label: "Ingresos Generados",
       value: `$${totalRevenue.toLocaleString()}`,
       icon: DollarSign,
-      color: "blue",
-      bgGradient: "bg-gradient-to-br from-blue-500/20 to-blue-500/5",
+      color: "primary",
+      bgGradient: "bg-gradient-primary",
     },
     {
       label: "Visitas Ejecutadas",
       value: totalVisits,
       icon: Users,
-      color: "accent",
-      bgGradient: "bg-gradient-to-br from-purple-500/20 to-purple-500/5",
+      color: "primary",
+      bgGradient: "bg-gradient-primary",
     },
   ];
 
