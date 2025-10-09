@@ -28,8 +28,8 @@ export const DashboardStats = ({
       label: "Horas Planificadas",
       value: `${totalPlannedHours}h`,
       icon: Clock,
-      color: "blue",
-      bgGradient: "bg-gradient-to-br from-blue-500/20 to-blue-500/5",
+      color: "primary",
+      bgGradient: "bg-gradient-primary",
     },
     {
       label: "Horas Ejecutadas",
@@ -66,12 +66,8 @@ export const DashboardStats = ({
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium mb-1">
-                    {stat.label}
-                  </p>
-                  <p className="text-3xl font-bold text-foreground">
-                    {stat.value}
-                  </p>
+                  <p className="text-sm text-muted-foreground font-medium mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold text-foreground">{stat.value}</p>
                 </div>
                 <div className={`p-5 rounded-xl ${stat.bgGradient} shadow-lg`}>
                   <Icon className="w-8 h-8 text-white drop-shadow-md" strokeWidth={2.5} />
