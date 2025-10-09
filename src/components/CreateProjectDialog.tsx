@@ -19,6 +19,7 @@ interface CreateProjectDialogProps {
     pm: string;
     country: string;
     hourlyRate: number;
+    numeroOportunidad: string;
   }) => void;
 }
 
@@ -34,6 +35,7 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
   const [pm, setPm] = useState("");
   const [country, setCountry] = useState("");
   const [hourlyRate, setHourlyRate] = useState("50");
+  const [numeroOportunidad, setNumeroOportunidad] = useState("");
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -74,6 +76,7 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
       pm: pm.trim(),
       country: country.trim(),
       hourlyRate: rate,
+      numeroOportunidad: numeroOportunidad.trim(),
     });
 
     setName("");
@@ -86,6 +89,7 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
     setPm("");
     setCountry("");
     setHourlyRate("50");
+    setNumeroOportunidad("");
     setIsOpen(false);
     toast.success("Proyecto creado exitosamente");
   };
@@ -122,6 +126,17 @@ export const CreateProjectDialog = ({ onCreateProject }: CreateProjectDialogProp
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="mt-2 min-h-[100px]"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="numeroOportunidad">Número Oportunidad</Label>
+            <Input
+              id="numeroOportunidad"
+              placeholder="Ej: OPP-2025-001"
+              value={numeroOportunidad}
+              onChange={(e) => setNumeroOportunidad(e.target.value)}
+              className="mt-2"
             />
           </div>
 

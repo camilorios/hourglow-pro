@@ -6,6 +6,12 @@ import { VisitCard } from "@/components/VisitCard";
 import { DashboardStats } from "@/components/DashboardStats";
 import tigoLogo from "@/assets/tigo-business-logo.png";
 
+interface Observation {
+  id: string;
+  text: string;
+  date: string;
+}
+
 interface Project {
   id: string;
   name: string;
@@ -19,6 +25,9 @@ interface Project {
   consultant: string;
   pm: string;
   country: string;
+  numeroOportunidad: string;
+  observaciones: Observation[];
+  terminado: boolean;
 }
 
 interface Visit {
@@ -29,6 +38,9 @@ interface Visit {
   tiempo: number;
   fecha: string;
   valorOportunidad: number;
+  numeroOportunidad: string;
+  observaciones: Observation[];
+  terminado: boolean;
 }
 
 const Index = () => {
@@ -46,6 +58,9 @@ const Index = () => {
       consultant: "Ana García",
       pm: "Carlos Ruiz",
       country: "Chile",
+      numeroOportunidad: "OPP-2025-001",
+      observaciones: [],
+      terminado: false,
     },
     {
       id: "2",
@@ -60,6 +75,9 @@ const Index = () => {
       consultant: "Pedro Martínez",
       pm: "Laura Sánchez",
       country: "México",
+      numeroOportunidad: "OPP-2025-002",
+      observaciones: [],
+      terminado: false,
     },
     {
       id: "3",
@@ -74,6 +92,9 @@ const Index = () => {
       consultant: "Jorge López",
       pm: "María González",
       country: "Colombia",
+      numeroOportunidad: "OPP-2025-003",
+      observaciones: [],
+      terminado: false,
     },
   ]);
 
@@ -86,6 +107,9 @@ const Index = () => {
       tiempo: 2,
       fecha: "2025-01-10",
       valorOportunidad: 50000,
+      numeroOportunidad: "OPP-V-2025-001",
+      observaciones: [],
+      terminado: false,
     },
     {
       id: "2",
@@ -95,6 +119,9 @@ const Index = () => {
       tiempo: 3,
       fecha: "2025-01-15",
       valorOportunidad: 75000,
+      numeroOportunidad: "OPP-V-2025-002",
+      observaciones: [],
+      terminado: false,
     },
   ]);
 
@@ -109,11 +136,14 @@ const Index = () => {
     pm: string;
     country: string;
     hourlyRate: number;
+    numeroOportunidad: string;
   }) => {
     const newProject: Project = {
       id: Date.now().toString(),
       ...projectData,
       executedHours: 0,
+      observaciones: [],
+      terminado: false,
     };
     setProjects([...projects, newProject]);
   };
@@ -147,16 +177,27 @@ const Index = () => {
     tiempo: number;
     fecha: string;
     valorOportunidad: number;
+    numeroOportunidad: string;
   }) => {
     const newVisit: Visit = {
       id: Date.now().toString(),
       ...visitData,
+      observaciones: [],
+      terminado: false,
     };
     setVisits([...visits, newVisit]);
   };
 
   const handleDeleteVisit = (id: string) => {
     setVisits(visits.filter((visit) => visit.id !== id));
+  };
+
+  const handleUpdateVisit = (id: string, updates: Partial<Visit>) => {
+    setVisits(
+      visits.map((visit) =>
+        visit.id === id ? { ...visit, ...updates } : visit
+      )
+    );
   };
 
   const totalPlannedHours = projects.reduce((sum, p) => sum + p.plannedHours, 0);
@@ -252,6 +293,7 @@ const Index = () => {
                   key={visit.id}
                   visit={visit}
                   onDeleteVisit={handleDeleteVisit}
+                  onUpdateVisit={handleUpdateVisit}
                 />
               ))}
             </div>

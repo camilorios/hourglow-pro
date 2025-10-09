@@ -14,6 +14,7 @@ interface CreateVisitDialogProps {
     tiempo: number;
     fecha: string;
     valorOportunidad: number;
+    numeroOportunidad: string;
   }) => void;
 }
 
@@ -25,6 +26,7 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
   const [tiempo, setTiempo] = useState("");
   const [fecha, setFecha] = useState("");
   const [valorOportunidad, setValorOportunidad] = useState("");
+  const [numeroOportunidad, setNumeroOportunidad] = useState("");
 
   const handleSubmit = () => {
     if (!producto.trim()) {
@@ -56,6 +58,7 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
       tiempo: tiempoNum,
       fecha,
       valorOportunidad: valor,
+      numeroOportunidad: numeroOportunidad.trim(),
     });
 
     setProducto("");
@@ -64,6 +67,7 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
     setTiempo("");
     setFecha("");
     setValorOportunidad("");
+    setNumeroOportunidad("");
     setIsOpen(false);
     toast.success("Visita comercial registrada exitosamente");
   };
@@ -88,6 +92,17 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
               placeholder="Ej: Solución Cloud"
               value={producto}
               onChange={(e) => setProducto(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="numeroOportunidad">Número Oportunidad</Label>
+            <Input
+              id="numeroOportunidad"
+              placeholder="Ej: OPP-V-2025-001"
+              value={numeroOportunidad}
+              onChange={(e) => setNumeroOportunidad(e.target.value)}
               className="mt-2"
             />
           </div>
