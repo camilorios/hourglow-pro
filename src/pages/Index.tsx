@@ -95,10 +95,13 @@ const Index = () => {
       } catch (error) {
         console.error('Error cargando datos:', error);
         toast({
-          title: "Error",
-          description: "No se pudieron cargar los datos desde la base de datos",
+          title: "Error de conexión",
+          description: "No se puede conectar a la base de datos Azure. Verifica que el firewall de Azure permita conexiones desde las IPs de Supabase.",
           variant: "destructive",
         });
+        // Permitir que la app cargue con datos vacíos
+        setProjects([]);
+        setVisits([]);
       } finally {
         setLoading(false);
       }
