@@ -15,12 +15,14 @@ async function getDbClient() {
     database: Deno.env.get('AZURE_DB_NAME'),
     tls: {
       enabled: true,
-      enforce: true,
+      enforce: false,
       caCertificates: []
     }
   });
   
+  console.log('Intentando conectar a Azure DB...');
   await client.connect();
+  console.log('Conexión exitosa a Azure DB');
   return client;
 }
 
