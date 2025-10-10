@@ -1,1 +1,7 @@
 project_id = "ewldjqrntpfhjlibwngd"
+
+[functions.azure-db-projects]
+verify_jwt = false
+
+[functions.azure-db-visits]
+verify_jwt = false

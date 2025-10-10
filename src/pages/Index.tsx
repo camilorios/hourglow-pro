@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProjectCard } from "@/components/ProjectCard";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
 import { CreateVisitDialog } from "@/components/CreateVisitDialog";
 import { VisitCard } from "@/components/VisitCard";
 import { DashboardStats } from "@/components/DashboardStats";
 import tigoLogo from "@/assets/tigo-business-logo.png";
+import { projectsApi, visitsApi, AzureProject, AzureVisit } from "@/lib/azureDb";
+import { useToast } from "@/hooks/use-toast";
 
 interface Project {
   id: string;
@@ -37,86 +39,75 @@ interface Visit {
 }
 
 const Index = () => {
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: "1",
-      name: "Desarrollo Web Corporativo",
-      description: "Sitio web completo para empresa de tecnología con panel de administración",
-      plannedHours: 120,
-      executedHours: 85,
-      hourlyRate: 50,
-      startDate: "2025-01-01",
-      endDate: "2025-03-15",
-      clientName: "TechCorp S.A.",
-      consultant: "Ana García",
-      pm: "Carlos Ruiz",
-      country: "Chile",
-      numeroOportunidad: "OPP-2025-001",
-      observaciones: [],
-      terminado: false,
-    },
-    {
-      id: "2",
-      name: "App Móvil E-commerce",
-      description: "Aplicación móvil para tienda online con integración de pagos",
-      plannedHours: 200,
-      executedHours: 150,
-      hourlyRate: 50,
-      startDate: "2024-12-01",
-      endDate: "2025-04-30",
-      clientName: "ShopNow Inc.",
-      consultant: "Pedro Martínez",
-      pm: "Laura Sánchez",
-      country: "México",
-      numeroOportunidad: "OPP-2024-045",
-      observaciones: [],
-      terminado: false,
-    },
-    {
-      id: "3",
-      name: "Sistema de Gestión",
-      description: "Software de gestión interna para control de inventario y ventas",
-      plannedHours: 160,
-      executedHours: 95,
-      hourlyRate: 50,
-      startDate: "2025-01-15",
-      endDate: "2025-05-20",
-      clientName: "Retail Plus",
-      consultant: "Jorge López",
-      pm: "María González",
-      country: "Colombia",
-      numeroOportunidad: "OPP-2025-008",
-      observaciones: [],
-      terminado: false,
-    },
-  ]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const [visits, setVisits] = useState<Visit[]>([
-    {
-      id: "1",
-      producto: "Solución Cloud",
-      pais: "Chile",
-      consultor: "Ana García",
-      tiempo: 2,
-      fecha: "2025-01-10",
-      valorOportunidad: 50000,
-      clientName: "TechCorp S.A.",
-      numeroOportunidad: "OPP-2025-001",
-    },
-    {
-      id: "2",
-      producto: "Ciberseguridad",
-      pais: "México",
-      consultor: "Pedro Martínez",
-      tiempo: 3,
-      fecha: "2025-01-15",
-      valorOportunidad: 75000,
-      clientName: "ShopNow Inc.",
-      numeroOportunidad: "OPP-2024-045",
-    },
-  ]);
+  // Cargar datos desde Azure al iniciar
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [azureProjects, azureVisits] = await Promise.all([
+          projectsApi.getAll(),
+          visitsApi.getAll(),
+        ]);
 
-  const handleCreateProject = (projectData: {
+        // Convertir proyectos de Azure al formato local
+        const mappedProjects: Project[] = azureProjects.map((p: AzureProject) => ({
+          id: p.id,
+          name: p.nombre,
+          description: "",
+          plannedHours: 0,
+          executedHours: 0,
+          hourlyRate: 0,
+          startDate: new Date(p.fecha_creacion).toISOString().split('T')[0],
+          endDate: "",
+          clientName: "",
+          consultant: p.consultor,
+          pm: "",
+          country: p.pais,
+          numeroOportunidad: p.numero_oportunidad || "",
+          observaciones: (p.observaciones || []).map(obs => ({
+            id: obs.id,
+            text: obs.texto,
+            date: obs.fecha,
+          })),
+          terminado: p.terminado,
+        }));
+
+        // Convertir visitas de Azure al formato local
+        const mappedVisits: Visit[] = azureVisits.map((v: AzureVisit) => ({
+          id: v.id,
+          producto: v.producto,
+          pais: v.pais,
+          consultor: v.consultor,
+          tiempo: parseFloat(v.hora),
+          fecha: v.fecha,
+          valorOportunidad: v.monto_oportunidad,
+          clientName: v.client_name,
+          numeroOportunidad: v.numero_oportunidad || "",
+        }));
+
+        setProjects(mappedProjects);
+        setVisits(mappedVisits);
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+        toast({
+          title: "Error",
+          description: "No se pudieron cargar los datos desde la base de datos",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [toast]);
+
+  const handleCreateProject = async (projectData: {
     name: string;
     description: string;
     plannedHours: number;
@@ -129,14 +120,39 @@ const Index = () => {
     hourlyRate: number;
     numeroOportunidad: string;
   }) => {
-    const newProject: Project = {
-      id: Date.now().toString(),
-      ...projectData,
-      executedHours: 0,
-      observaciones: [],
-      terminado: false,
-    };
-    setProjects([...projects, newProject]);
+    try {
+      const newId = Date.now().toString();
+      await projectsApi.create({
+        id: newId,
+        nombre: projectData.name,
+        numeroOportunidad: projectData.numeroOportunidad,
+        pais: projectData.country,
+        consultor: projectData.consultant,
+        montoOportunidad: projectData.plannedHours * projectData.hourlyRate,
+        fechaCreacion: new Date().toISOString(),
+      });
+
+      const newProject: Project = {
+        id: newId,
+        ...projectData,
+        executedHours: 0,
+        observaciones: [],
+        terminado: false,
+      };
+      setProjects([...projects, newProject]);
+      
+      toast({
+        title: "Proyecto creado",
+        description: "El proyecto se ha guardado en la base de datos",
+      });
+    } catch (error) {
+      console.error('Error creando proyecto:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear el proyecto",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleUpdateHours = (id: string, hoursToAdd: number) => {
@@ -149,19 +165,62 @@ const Index = () => {
     );
   };
 
-  const handleUpdateProject = (id: string, updates: Partial<Project>) => {
-    setProjects(
-      projects.map((project) =>
-        project.id === id ? { ...project, ...updates } : project
-      )
-    );
+  const handleUpdateProject = async (id: string, updates: Partial<Project>) => {
+    try {
+      const project = projects.find(p => p.id === id);
+      if (!project) return;
+
+      const updatedProject = { ...project, ...updates };
+      
+      await projectsApi.update(id, {
+        nombre: updatedProject.name,
+        numeroOportunidad: updatedProject.numeroOportunidad,
+        pais: updatedProject.country,
+        consultor: updatedProject.consultant,
+        montoOportunidad: updatedProject.plannedHours * updatedProject.hourlyRate,
+        terminado: updatedProject.terminado,
+      });
+
+      setProjects(
+        projects.map((project) =>
+          project.id === id ? updatedProject : project
+        )
+      );
+
+      toast({
+        title: "Proyecto actualizado",
+        description: "Los cambios se han guardado en la base de datos",
+      });
+    } catch (error) {
+      console.error('Error actualizando proyecto:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el proyecto",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteProject = (id: string) => {
-    setProjects(projects.filter((project) => project.id !== id));
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await projectsApi.delete(id);
+      setProjects(projects.filter((project) => project.id !== id));
+      
+      toast({
+        title: "Proyecto eliminado",
+        description: "El proyecto se ha eliminado de la base de datos",
+      });
+    } catch (error) {
+      console.error('Error eliminando proyecto:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el proyecto",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleCreateVisit = (visitData: {
+  const handleCreateVisit = async (visitData: {
     producto: string;
     pais: string;
     consultor: string;
@@ -171,29 +230,104 @@ const Index = () => {
     clientName: string;
     numeroOportunidad: string;
   }) => {
-    const newVisit: Visit = {
-      id: Date.now().toString(),
-      ...visitData,
-    };
-    setVisits([...visits, newVisit]);
+    try {
+      const newId = Date.now().toString();
+      await visitsApi.create({
+        id: newId,
+        producto: visitData.producto,
+        clientName: visitData.clientName,
+        numeroOportunidad: visitData.numeroOportunidad,
+        pais: visitData.pais,
+        consultor: visitData.consultor,
+        hora: visitData.tiempo.toString(),
+        fecha: visitData.fecha,
+        montoOportunidad: visitData.valorOportunidad,
+      });
+
+      const newVisit: Visit = {
+        id: newId,
+        ...visitData,
+      };
+      setVisits([...visits, newVisit]);
+      
+      toast({
+        title: "Visita creada",
+        description: "La visita comercial se ha guardado en la base de datos",
+      });
+    } catch (error) {
+      console.error('Error creando visita:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear la visita comercial",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteVisit = (id: string) => {
-    setVisits(visits.filter((visit) => visit.id !== id));
+  const handleDeleteVisit = async (id: string) => {
+    try {
+      await visitsApi.delete(id);
+      setVisits(visits.filter((visit) => visit.id !== id));
+      
+      toast({
+        title: "Visita eliminada",
+        description: "La visita comercial se ha eliminado de la base de datos",
+      });
+    } catch (error) {
+      console.error('Error eliminando visita:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la visita comercial",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleUpdateVisit = (id: string, visitData: Omit<Visit, "id">) => {
-    setVisits(
-      visits.map((visit) =>
-        visit.id === id ? { ...visitData, id } : visit
-      )
-    );
+  const handleUpdateVisit = async (id: string, visitData: Omit<Visit, "id">) => {
+    try {
+      await visitsApi.update(id, {
+        producto: visitData.producto,
+        clientName: visitData.clientName,
+        numeroOportunidad: visitData.numeroOportunidad,
+        pais: visitData.pais,
+        consultor: visitData.consultor,
+        hora: visitData.tiempo.toString(),
+        fecha: visitData.fecha,
+        montoOportunidad: visitData.valorOportunidad,
+      });
+
+      setVisits(
+        visits.map((visit) =>
+          visit.id === id ? { ...visitData, id } : visit
+        )
+      );
+      
+      toast({
+        title: "Visita actualizada",
+        description: "Los cambios se han guardado en la base de datos",
+      });
+    } catch (error) {
+      console.error('Error actualizando visita:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la visita comercial",
+        variant: "destructive",
+      });
+    }
   };
 
   const totalPlannedHours = projects.reduce((sum, p) => sum + p.plannedHours, 0);
   const totalExecutedHours = projects.reduce((sum, p) => sum + p.executedHours, 0);
   const totalRevenue = projects.reduce((sum, p) => sum + p.executedHours * p.hourlyRate, 0);
   const totalVisits = visits.length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Cargando datos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

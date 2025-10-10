@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { projectsApi } from "@/lib/azureDb";
 
 interface Project {
   id: string;
@@ -160,24 +161,35 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
     toast.success("Proyecto eliminado");
   };
 
-  const handleAddObservacion = () => {
+  const handleAddObservacion = async () => {
     if (!newObservacion.trim()) {
       toast.error("La observación no puede estar vacía");
       return;
     }
 
-    const nuevaObservacion = {
-      id: Date.now().toString(),
-      text: newObservacion.trim(),
-      date: new Date().toISOString(),
-    };
+    try {
+      const nuevaObservacion = {
+        id: Date.now().toString(),
+        text: newObservacion.trim(),
+        date: new Date().toISOString(),
+      };
 
-    onUpdateProject(project.id, {
-      observaciones: [...project.observaciones, nuevaObservacion],
-    });
+      await projectsApi.addObservation(project.id, {
+        observationId: nuevaObservacion.id,
+        texto: nuevaObservacion.text,
+        fecha: nuevaObservacion.date,
+      });
 
-    setNewObservacion("");
-    toast.success("Observación agregada");
+      onUpdateProject(project.id, {
+        observaciones: [...project.observaciones, nuevaObservacion],
+      });
+
+      setNewObservacion("");
+      toast.success("Observación agregada");
+    } catch (error) {
+      console.error('Error agregando observación:', error);
+      toast.error("No se pudo agregar la observación");
+    }
   };
 
   return (
