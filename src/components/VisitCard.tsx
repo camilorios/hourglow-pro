@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Clock, DollarSign, MapPin, User, Calendar, Trash2 } from "lucide-react";
+import { Briefcase, Clock, DollarSign, MapPin, User, Calendar, Trash2, Building2, Hash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +22,8 @@ interface Visit {
   tiempo: number;
   fecha: string;
   valorOportunidad: number;
+  clientName: string;
+  numeroOportunidad: string;
 }
 
 interface VisitCardProps {
@@ -48,6 +50,20 @@ export const VisitCard = ({ visit, onDeleteVisit }: VisitCardProps) => {
               <h3 className="text-lg font-semibold text-foreground truncate">{visit.producto}</h3>
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
+              {visit.clientName && (
+                <div className="flex items-center gap-1">
+                  <Building2 className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Cliente:</span> 
+                  <span className="font-medium">{visit.clientName}</span>
+                </div>
+              )}
+              {visit.numeroOportunidad && (
+                <div className="flex items-center gap-1">
+                  <Hash className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Oportunidad:</span> 
+                  <span className="font-medium">{visit.numeroOportunidad}</span>
+                </div>
+              )}
               {visit.pais && (
                 <div className="flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-muted-foreground" />

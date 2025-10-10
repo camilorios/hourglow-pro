@@ -32,6 +32,8 @@ interface Visit {
   tiempo: number;
   fecha: string;
   valorOportunidad: number;
+  clientName: string;
+  numeroOportunidad: string;
 }
 
 const Index = () => {
@@ -98,6 +100,8 @@ const Index = () => {
       tiempo: 2,
       fecha: "2025-01-10",
       valorOportunidad: 50000,
+      clientName: "TechCorp S.A.",
+      numeroOportunidad: "OPP-2025-001",
     },
     {
       id: "2",
@@ -107,6 +111,8 @@ const Index = () => {
       tiempo: 3,
       fecha: "2025-01-15",
       valorOportunidad: 75000,
+      clientName: "ShopNow Inc.",
+      numeroOportunidad: "OPP-2024-045",
     },
   ]);
 
@@ -162,6 +168,8 @@ const Index = () => {
     tiempo: number;
     fecha: string;
     valorOportunidad: number;
+    clientName: string;
+    numeroOportunidad: string;
   }) => {
     const newVisit: Visit = {
       id: Date.now().toString(),

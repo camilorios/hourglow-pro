@@ -14,6 +14,8 @@ interface CreateVisitDialogProps {
     tiempo: number;
     fecha: string;
     valorOportunidad: number;
+    clientName: string;
+    numeroOportunidad: string;
   }) => void;
 }
 
@@ -25,6 +27,8 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
   const [tiempo, setTiempo] = useState("");
   const [fecha, setFecha] = useState("");
   const [valorOportunidad, setValorOportunidad] = useState("");
+  const [clientName, setClientName] = useState("");
+  const [numeroOportunidad, setNumeroOportunidad] = useState("");
 
   const handleSubmit = () => {
     if (!producto.trim()) {
@@ -56,6 +60,8 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
       tiempo: tiempoNum,
       fecha,
       valorOportunidad: valor,
+      clientName: clientName.trim(),
+      numeroOportunidad: numeroOportunidad.trim(),
     });
 
     setProducto("");
@@ -64,6 +70,8 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
     setTiempo("");
     setFecha("");
     setValorOportunidad("");
+    setClientName("");
+    setNumeroOportunidad("");
     setIsOpen(false);
     toast.success("Visita comercial registrada exitosamente");
   };
@@ -90,6 +98,29 @@ export const CreateVisitDialog = ({ onCreateVisit }: CreateVisitDialogProps) => 
               onChange={(e) => setProducto(e.target.value)}
               className="mt-2"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="clientName">Nombre del Cliente</Label>
+              <Input
+                id="clientName"
+                placeholder="Ej: TechCorp S.A."
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="numeroOportunidad">Número de Oportunidad</Label>
+              <Input
+                id="numeroOportunidad"
+                placeholder="Ej: OPP-2025-001"
+                value={numeroOportunidad}
+                onChange={(e) => setNumeroOportunidad(e.target.value)}
+                className="mt-2"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
