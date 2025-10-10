@@ -1,0 +1,58 @@
+name: Build & Deploy hourglow-pro to Azure App Service
+
+on:
+  push:
+    branches: [ "main" ]        # Se ejecuta al hacer push a main
+  workflow_dispatch:             # Permite ejecutarlo manualmente desde la pestaña Actions
+
+env:
+  AZURE_WEBAPP_NAME: hourglow-pro-webapp-jccr   # <-- nombre exacto de tu Web App en Azure
+  NODE_VERSION: "20"                            # versión de Node a usar en el runner
+
+concurrency:
+  group: deploy-hourglow-pro                    # evita despliegues superpuestos
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest                      # el runner que ejecuta el pipeline
+
+    steps:
+      - name: Checkout                          # 1) trae tu código al runner
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}  # 2) instala Node 20 en el runner
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # 3) instala dependencias, compila el frontend (Vite) y elimina devDependencies
+      - name: Install & Build
+        run: |
+          npm ci
+          npm run build
+          npm prune --omit=dev
+
+      # 4) empaqueta SOLO lo necesario para ejecutar en App Service
+      #    (dist/, server.mjs, package.json, package-lock.json y node_modules de prod)
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          cp -R dist server.mjs package.json package-lock.json node_modules deploy/
+          cd deploy
+          zip -r ../app.zip .
+
+      # 5) login a Azure usando OIDC (no hay passwords ni client secret)
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}         # lo crearás como Secret en GitHub
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}         # idem
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # 6) despliega el ZIP a tu App Service
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: app.zip
