@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Clock, DollarSign, MapPin, User, Calendar, Trash2, Building2, Hash } from "lucide-react";
+import { Briefcase, Clock, DollarSign, MapPin, User, Calendar, Trash2, Building2, Hash, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,6 +13,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface Visit {
@@ -29,12 +33,61 @@ interface Visit {
 interface VisitCardProps {
   visit: Visit;
   onDeleteVisit: (id: string) => void;
+  onUpdateVisit: (id: string, visitData: Omit<Visit, "id">) => void;
 }
 
-export const VisitCard = ({ visit, onDeleteVisit }: VisitCardProps) => {
+export const VisitCard = ({ visit, onDeleteVisit, onUpdateVisit }: VisitCardProps) => {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [producto, setProducto] = useState(visit.producto);
+  const [pais, setPais] = useState(visit.pais);
+  const [consultor, setConsultor] = useState(visit.consultor);
+  const [tiempo, setTiempo] = useState(visit.tiempo.toString());
+  const [fecha, setFecha] = useState(visit.fecha);
+  const [valorOportunidad, setValorOportunidad] = useState(visit.valorOportunidad.toString());
+  const [clientName, setClientName] = useState(visit.clientName);
+  const [numeroOportunidad, setNumeroOportunidad] = useState(visit.numeroOportunidad);
+
   const handleDelete = () => {
     onDeleteVisit(visit.id);
     toast.success("Visita comercial eliminada");
+  };
+
+  const handleUpdate = () => {
+    if (!producto.trim()) {
+      toast.error("El producto es requerido");
+      return;
+    }
+
+    const tiempoNum = parseFloat(tiempo);
+    if (isNaN(tiempoNum) || tiempoNum <= 0) {
+      toast.error("Por favor ingrese un tiempo válido");
+      return;
+    }
+
+    const valor = parseFloat(valorOportunidad);
+    if (isNaN(valor) || valor <= 0) {
+      toast.error("Por favor ingrese un valor de oportunidad válido");
+      return;
+    }
+
+    if (!fecha) {
+      toast.error("La fecha es requerida");
+      return;
+    }
+
+    onUpdateVisit(visit.id, {
+      producto: producto.trim(),
+      pais: pais.trim(),
+      consultor: consultor.trim(),
+      tiempo: tiempoNum,
+      fecha,
+      valorOportunidad: valor,
+      clientName: clientName.trim(),
+      numeroOportunidad: numeroOportunidad.trim(),
+    });
+
+    setIsEditOpen(false);
+    toast.success("Visita comercial actualizada");
   };
 
   return (
@@ -111,6 +164,122 @@ export const VisitCard = ({ visit, onDeleteVisit }: VisitCardProps) => {
 
           {/* Right Section: Actions */}
           <div className="flex gap-2 shrink-0">
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="shadow-sm">
+                  <Pencil className="w-4 h-4 mr-1" />
+                  Editar
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl">Editar Visita Comercial</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-5 pt-4">
+                  <div>
+                    <Label htmlFor="edit-producto">Producto</Label>
+                    <Input
+                      id="edit-producto"
+                      placeholder="Ej: Solución Cloud"
+                      value={producto}
+                      onChange={(e) => setProducto(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-clientName">Nombre del Cliente</Label>
+                      <Input
+                        id="edit-clientName"
+                        placeholder="Ej: TechCorp S.A."
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-numeroOportunidad">Número de Oportunidad</Label>
+                      <Input
+                        id="edit-numeroOportunidad"
+                        placeholder="Ej: OPP-2025-001"
+                        value={numeroOportunidad}
+                        onChange={(e) => setNumeroOportunidad(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-pais">País</Label>
+                      <Input
+                        id="edit-pais"
+                        placeholder="Ej: Colombia"
+                        value={pais}
+                        onChange={(e) => setPais(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-consultor">Consultor</Label>
+                      <Input
+                        id="edit-consultor"
+                        placeholder="Ej: Juan Pérez"
+                        value={consultor}
+                        onChange={(e) => setConsultor(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-tiempo">Tiempo (horas)</Label>
+                      <Input
+                        id="edit-tiempo"
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        placeholder="0.0"
+                        value={tiempo}
+                        onChange={(e) => setTiempo(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-fecha">Fecha</Label>
+                      <Input
+                        id="edit-fecha"
+                        type="date"
+                        value={fecha}
+                        onChange={(e) => setFecha(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-valorOportunidad">Valor Oportunidad ($)</Label>
+                    <Input
+                      id="edit-valorOportunidad"
+                      type="number"
+                      step="1000"
+                      min="0"
+                      placeholder="0.00"
+                      value={valorOportunidad}
+                      onChange={(e) => setValorOportunidad(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <Button onClick={handleUpdate} className="w-full bg-gradient-primary">
+                    Actualizar Visita
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button size="sm" variant="destructive" className="shadow-sm">

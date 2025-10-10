@@ -182,6 +182,14 @@ const Index = () => {
     setVisits(visits.filter((visit) => visit.id !== id));
   };
 
+  const handleUpdateVisit = (id: string, visitData: Omit<Visit, "id">) => {
+    setVisits(
+      visits.map((visit) =>
+        visit.id === id ? { ...visitData, id } : visit
+      )
+    );
+  };
+
   const totalPlannedHours = projects.reduce((sum, p) => sum + p.plannedHours, 0);
   const totalExecutedHours = projects.reduce((sum, p) => sum + p.executedHours, 0);
   const totalRevenue = projects.reduce((sum, p) => sum + p.executedHours * p.hourlyRate, 0);
@@ -270,13 +278,14 @@ const Index = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {visits.map((visit) => (
-                <VisitCard
-                  key={visit.id}
-                  visit={visit}
-                  onDeleteVisit={handleDeleteVisit}
-                />
-              ))}
+            {visits.map((visit) => (
+              <VisitCard
+                key={visit.id}
+                visit={visit}
+                onDeleteVisit={handleDeleteVisit}
+                onUpdateVisit={handleUpdateVisit}
+              />
+            ))}
             </div>
           )}
         </div>
