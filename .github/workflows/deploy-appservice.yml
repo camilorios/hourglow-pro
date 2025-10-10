@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-# Necesario para autenticación OIDC con azure/login
+# 1) Permisos para solicitar el ID Token (OIDC)
 permissions:
   id-token: write
   contents: read
@@ -31,6 +31,14 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # 2) Comprobación temprana: asegúrate de que los secrets EXISTEN
+      - name: Validate OIDC inputs
+        run: |
+          if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ]; then echo "ERROR: Falta secret AZURE_CLIENT_ID"; exit 1; fi
+          if [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then echo "ERROR: Falta secret AZURE_TENANT_ID"; exit 1; fi
+          if [ -z "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then echo "ERROR: Falta secret AZURE_SUBSCRIPTION_ID"; exit 1; fi
+          echo "OK: secrets presentes"
+
       - name: Install & Build
         run: |
           npm ci
@@ -44,12 +52,15 @@ jobs:
           cd deploy
           zip -r ../app.zip .
 
+      # 3) Login a Azure con OIDC (forzado)
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
+          auth-type: ID_TOKEN                # <--- fuerza OIDC
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          audience: api://AzureADTokenExchange
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
