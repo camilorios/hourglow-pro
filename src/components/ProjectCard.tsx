@@ -61,6 +61,7 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
   const [editPm, setEditPm] = useState(project.pm);
   const [editCountry, setEditCountry] = useState(project.country);
   const [editPlannedHours, setEditPlannedHours] = useState(project.plannedHours.toString());
+  const [editExecutedHours, setEditExecutedHours] = useState(project.executedHours.toString());
   const [editStartDate, setEditStartDate] = useState(project.startDate);
   const [editEndDate, setEditEndDate] = useState(project.endDate);
   const [editHourlyRate, setEditHourlyRate] = useState(project.hourlyRate.toString());
@@ -122,6 +123,12 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
       return;
     }
 
+    const executedHours = parseFloat(editExecutedHours);
+    if (isNaN(executedHours) || executedHours < 0) {
+      toast.error("Por favor ingrese horas ejecutadas válidas");
+      return;
+    }
+
     const rate = parseFloat(editHourlyRate);
     if (isNaN(rate) || rate <= 0) {
       toast.error("Por favor ingrese un valor por hora válido");
@@ -142,6 +149,7 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
       name: editName.trim(),
       description: editDescription.trim(),
       plannedHours: hours,
+      executedHours: executedHours,
       startDate: editStartDate,
       endDate: editEndDate,
       clientName: editClientName.trim(),
@@ -410,17 +418,29 @@ export const ProjectCard = ({ project, onUpdateHours, onUpdateProject, onDeleteP
                       />
                     </div>
                     <div>
-                      <Label htmlFor="edit-rate">Valor por Hora ($)</Label>
+                      <Label htmlFor="edit-executed-hours">Horas Ejecutadas</Label>
                       <Input
-                        id="edit-rate"
+                        id="edit-executed-hours"
                         type="number"
                         step="0.5"
                         min="0"
-                        value={editHourlyRate}
-                        onChange={(e) => setEditHourlyRate(e.target.value)}
+                        value={editExecutedHours}
+                        onChange={(e) => setEditExecutedHours(e.target.value)}
                         className="mt-2"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-rate">Valor por Hora ($)</Label>
+                    <Input
+                      id="edit-rate"
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      value={editHourlyRate}
+                      onChange={(e) => setEditHourlyRate(e.target.value)}
+                      className="mt-2"
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
