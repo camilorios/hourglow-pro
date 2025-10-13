@@ -39,8 +39,22 @@ async function initializeVisitsTable(client: Client) {
         hora TEXT NOT NULL,
         fecha TEXT NOT NULL,
         monto_oportunidad NUMERIC NOT NULL,
+        activo BOOLEAN NOT NULL DEFAULT TRUE,
         fecha_creacion TIMESTAMP NOT NULL DEFAULT NOW()
       )
+    `);
+
+    // Agregar columna activo si no existe (para migración de datos existentes)
+    await client.queryArray(`
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='visits' AND column_name='activo'
+        ) THEN
+          ALTER TABLE visits ADD COLUMN activo BOOLEAN NOT NULL DEFAULT TRUE;
+        END IF;
+      END $$;
     `);
 
     console.log('Tabla visits inicializada correctamente');
@@ -66,7 +80,7 @@ serve(async (req) => {
     switch (method) {
       case 'GET_ALL': {
         const result = await client.queryObject(`
-          SELECT * FROM visits ORDER BY fecha_creacion DESC
+          SELECT * FROM visits WHERE activo = TRUE ORDER BY fecha_creacion DESC
         `);
         
         return new Response(JSON.stringify(result.rows), {
@@ -105,7 +119,11 @@ serve(async (req) => {
       }
 
       case 'DELETE': {
-        await client.queryArray(`DELETE FROM visits WHERE id = $1`, [visitId]);
+        // Soft delete: marcar como inactivo en lugar de eliminar
+        await client.queryArray(
+          `UPDATE visits SET activo = FALSE WHERE id = $1`,
+          [visitId]
+        );
 
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

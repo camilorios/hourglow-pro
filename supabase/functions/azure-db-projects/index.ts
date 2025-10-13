@@ -90,6 +90,7 @@ serve(async (req) => {
             ) as observaciones
           FROM projects p
           LEFT JOIN observaciones o ON p.id = o.project_id
+          WHERE p.terminado = FALSE
           GROUP BY p.id
           ORDER BY p.fecha_creacion DESC
         `);
@@ -144,7 +145,11 @@ serve(async (req) => {
       }
 
       case 'DELETE': {
-        await client.queryArray(`DELETE FROM projects WHERE id = $1`, [projectId]);
+        // Soft delete: marcar como terminado en lugar de eliminar
+        await client.queryArray(
+          `UPDATE projects SET terminado = TRUE WHERE id = $1`,
+          [projectId]
+        );
 
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
